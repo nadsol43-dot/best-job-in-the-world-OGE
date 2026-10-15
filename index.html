@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Best Job in the World - Flashcards</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #0077b6, #00b4d8, #90e0ef);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 10px;
+    color: #fff;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+    text-align: center;
+    text-shadow: 0 2px 10px rgba(0,0,0,.3);
+  }
+
+  .subtitle {
+    font-size: .9rem;
+    opacity: .85;
+    margin-bottom: 18px;
+    text-align: center;
+  }
+
+  /* ---- group filter ---- */
+  .group-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 18px;
+    max-width: 720px;
+  }
+
+  .group-btn {
+    padding: 8px 14px;
+    font-size: .8rem;
+    font-weight: 600;
+    border: 2px solid rgba(255,255,255,.4);
+    background: rgba(255,255,255,.15);
+    color: #fff;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+
+  .group-btn:hover { background: rgba(255,255,255,.3); }
+  .group-btn.active {
+    background: #fff;
+    color: #0077b6;
+    border-color: #fff;
+  }
+
+  /* ---- counter & progress ---- */
+  .counter {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+
+  .progress-wrap {
+    width: 460px;
+    max-width: 92vw;
+    height: 5px;
+    background: rgba(255,255,255,.2);
+    border-radius: 5px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: #ffd60a;
+    border-radius: 5px;
+    transition: width .4s ease;
+  }
+
+  /* ---- card ---- */
+  .card-scene {
+    width: 460px;
+    max-width: 92vw;
+    height: 280px;
+    perspective: 1200px;
+    margin-bottom: 24px;
+    cursor: pointer;
+  }
+
+  .card {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transition: transform .6s cubic-bezier(.4,.2,.2,1);
+    transform-style: preserve-3d;
+  }
+
+  .card.is-flipped { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 12px 40px rgba(0,0,0,.35);
+  }
+
+  .card-front {
+    background: linear-gradient(145deg, #ff6b6b, #ee5a6f);
+  }
+
+  .card-back {
+    background: linear-gradient(145deg, #4ecdc4, #44a08d);
+    transform: rotateY(180deg);
+  }
+
+  .card-face .label {
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    opacity: .8;
+    margin-bottom: 12px;
+  }
+
+  .card-face .group-tag {
+    font-size: .7rem;
+    padding: 4px 10px;
+    background: rgba(255,255,255,.25);
+    border-radius: 12px;
+    margin-top: 14px;
+    letter-spacing: .5px;
+  }
+
+  .card-face .text {
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .hint {
+    font-size: .75rem;
+    opacity: .6;
+    margin-top: 12px;
+  }
+
+  /* ---- buttons ---- */
+  .controls {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+
+  .btn {
+    padding: 12px 32px;
+    font-size: .95rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all .25s ease;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+
+  .btn-back {
+    background: rgba(255,255,255,.2);
+    color: #fff;
+    border: 2px solid rgba(255,255,255,.4);
+  }
+  .btn-back:hover { background: rgba(255,255,255,.35); }
+
+  .btn-next {
+    background: #ffd60a;
+    color: #0077b6;
+  }
+  .btn-next:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,214,10,.5); }
+
+  .btn-shuffle {
+    background: rgba(255,255,255,.2);
+    color: #fff;
+    border: 2px solid rgba(255,255,255,.4);
+    font-size: .8rem;
+    padding: 8px 18px;
+  }
+  .btn-shuffle:hover { background: rgba(255,255,255,.35); }
+
+  .btn:active { transform: scale(.96); }
+
+  .kb-hint {
+    font-size: .75rem;
+    opacity: .5;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+<h1>🏝️ Best Job in the World</h1>
+<div class="subtitle">Interactive Flashcards — click the card to flip</div>
+
+<div class="group-filter" id="groupFilter">
+  <button class="group-btn active" data-group="all">All (48)</button>
+  <button class="group-btn" data-group="place">🏝️ Place &amp; Prize</button>
+  <button class="group-btn" data-group="job">💼 Job &amp; Application</button>
+  <button class="group-btn" data-group="daily">⏰ Daily Reality</button>
+  <button class="group-btn" data-group="danger">⚠️ Dangers &amp; Health</button>
+  <button class="group-btn" data-group="useful">🔗 Useful Words</button>
+</div>
+
+<div class="counter" id="counter">1 / 48</div>
+<div class="progress-wrap"><div class="progress-bar" id="progress"></div></div>
+
+<div class="card-scene" id="scene" onclick="flipCard()">
+  <div class="card" id="card">
+    <div class="card-face card-front">
+      <div class="label">🇷🇺 Русский</div>
+      <div class="text" id="frontText"></div>
+      <div class="group-tag" id="groupTag"></div>
+      <div class="hint">нажмите, чтобы перевернуть</div>
+    </div>
+    <div class="card-face card-back">
+      <div class="label">🇬🇧 English</div>
+      <div class="text" id="backText"></div>
+      <div class="group-tag" id="groupTagBack"></div>
+      <div class="hint">click to flip back</div>
+    </div>
+  </div>
+</div>
+
+<div class="controls">
+  <button class="btn btn-back" onclick="goBack()">← Back</button>
+  <button class="btn btn-next" onclick="goNext()">Next →</button>
+</div>
+<button class="btn btn-shuffle" onclick="shuffleCards()">🔀 Shuffle</button>
+
+<div class="kb-hint">Keyboard: ← Back &#xa0;|&#xa0; → Next &#xa0;|&#xa0; Space Flip</div>
+
+<script>
+const allCards = [
+  // 🏝️ Place & Prize
+  { ru: "смотритель", en: "a caretaker", group: "place", tag: "🏝️ Place & Prize" },
+  { ru: "приключение", en: "adventure", group: "place", tag: "🏝️ Place & Prize" },
+  { ru: "барьерный риф", en: "barrier reef", group: "place", tag: "🏝️ Place & Prize" },
+  { ru: "существо", en: "creature", group: "place", tag: "🏝️ Place & Prize" },
+  { ru: "открывать, обнаруживать", en: "discover", group: "place", tag: "🏝️ Place & Prize" },
+  { ru: "необычный, экстраординарный", en: "extraordinary", group: "place", tag: "🏝️ Place & Prize" },
+  { ru: "фауна (животный мир)", en: "fauna", group: "place", tag: "🏝️ Place & Prize" },
+  { ru: "флора (растительный мир)", en: "flora", group: "place", tag: "🏝️ Place & Prize" },
+  { ru: "жизнь на земле", en: "life on earth", group: "place", tag: "🏝️ Place & Prize" },
+  { ru: "роскошная вилла", en: "luxury villa", group: "place", tag: "🏝️ Place & Prize" },
+  { ru: "сокровище", en: "treasure", group: "place", tag: "🏝️ Place & Prize" },
+
+  // 💼 Job & Application
+  { ru: "кандидат (на работу)", en: "applicant", group: "job", tag: "💼 Job & Application" },
+  { ru: "кандидаты были проинтервьюированы", en: "candidates were interviewed", group: "job", tag: "💼 Job & Application" },
+  { ru: "конкурс, соревнование", en: "contest", group: "job", tag: "💼 Job & Application" },
+  { ru: "расходы", en: "expenses", group: "job", tag: "💼 Job & Application" },
+  { ru: "бесплатное жильё", en: "free accommodation", group: "job", tag: "💼 Job & Application" },
+  { ru: "включать", en: "include", group: "job", tag: "💼 Job & Application" },
+  { ru: "описание работы", en: "job description", group: "job", tag: "💼 Job & Application" },
+  { ru: "обязанности по работе", en: "job's duties", group: "job", tag: "💼 Job & Application" },
+  { ru: "журналисты", en: "journalists", group: "job", tag: "💼 Job & Application" },
+  { ru: "большая зарплата", en: "large salary", group: "job", tag: "💼 Job & Application" },
+  { ru: "требование", en: "requirement", group: "job", tag: "💼 Job & Application" },
+  { ru: "обязанности, ответственность", en: "responsibilities", group: "job", tag: "💼 Job & Application" },
+  { ru: "рекламировать", en: "to advertise", group: "job", tag: "💼 Job & Application" },
+  { ru: "объявление, реклама", en: "the advertisement", group: "job", tag: "💼 Job & Application" },
+  { ru: "подаваться (на работу)", en: "to apply", group: "job", tag: "💼 Job & Application" },
+  { ru: "быть оплаченным", en: "to be paid", group: "job", tag: "💼 Job & Application" },
+  { ru: "предложить работу", en: "to offer a job", group: "job", tag: "💼 Job & Application" },
+  { ru: "требовать", en: "to require", group: "job", tag: "💼 Job & Application" },
+
+  // ⏰ Daily Reality
+  { ru: "почти", en: "almost", group: "daily", tag: "⏰ Daily Reality" },
+  { ru: "более занятой", en: "busier", group: "daily", tag: "⏰ Daily Reality" },
+  { ru: "на полгода, в течение полугода", en: "for half of the year", group: "daily", tag: "⏰ Daily Reality" },
+  { ru: "очень понравилось, очень наслаждался", en: "greatly enjoyed", group: "daily", tag: "⏰ Daily Reality" },
+  { ru: "он понял, он осознал", en: "he realized", group: "daily", tag: "⏰ Daily Reality" },
+  { ru: "он работал до 19 часов в день", en: "he worked up to 19 hours a day", group: "daily", tag: "⏰ Daily Reality" },
+  { ru: "семь дней в неделю", en: "seven days a week", group: "daily", tag: "⏰ Daily Reality" },
+  { ru: "это была, вероятно, самая сложная часть работы", en: "that was probably the hardest part of the job", group: "daily", tag: "⏰ Daily Reality" },
+  { ru: "научить его ценным урокам", en: "to teach him valuable lessons", group: "daily", tag: "⏰ Daily Reality" },
+
+  // ⚠️ Dangers & Health
+  { ru: "имеет определённую степень риска", en: "has a certain degree of risk", group: "danger", tag: "⚠️ Dangers & Health" },
+  { ru: "считается ядовитым", en: "it is considered to be poisonous", group: "danger", tag: "⚠️ Dangers & Health" },
+  { ru: "восстановиться после курса антибиотиков", en: "to recover after a course of antibiotics", group: "danger", tag: "⚠️ Dangers & Health" },
+  { ru: "жалить", en: "to sting", group: "danger", tag: "⚠️ Dangers & Health" },
+
+  // 🔗 Useful Words
+  { ru: "удивительно, неожиданно", en: "surprisingly", group: "useful", tag: "🔗 Useful Words" },
+  { ru: "тысяча", en: "thousand", group: "useful", tag: "🔗 Useful Words" },
+  { ru: "в течение, в пределах", en: "within", group: "useful", tag: "🔗 Useful Words" },
+  { ru: "восточное побережье", en: "the eastern coast", group: "useful", tag: "🔗 Useful Words" },
+  { ru: "крупнейший коралловый риф", en: "the largest coral reef", group: "useful", tag: "🔗 Useful Words" },
+  { ru: "заботиться о, ухаживать", en: "look after", group: "useful", tag: "🔗 Useful Words" }
+];
+
+let cards = [...allCards];
+let current = 0;
+let activeGroup = 'all';
+
+const cardEl = document.getElementById('card');
+const frontText = document.getElementById('frontText');
+const backText = document.getElementById('backText');
+const counter = document.getElementById('counter');
+const progress = document.getElementById('progress');
+const groupTag = document.getElementById('groupTag');
+const groupTagBack = document.getElementById('groupTagBack');
+
+function render() {
+  cardEl.classList.remove('is-flipped');
+  if (cards.length === 0) {
+    frontText.textContent = "No cards";
+    backText.textContent = "No cards";
+    counter.textContent = "0 / 0";
+    progress.style.width = "0%";
+    groupTag.textContent = "";
+    groupTagBack.textContent = "";
+    return;
+  }
+  const c = cards[current];
+  frontText.textContent = c.ru;
+  backText.textContent = c.en;
+  groupTag.textContent = c.tag;
+  groupTagBack.textContent = c.tag;
+  counter.textContent = `${current + 1} / ${cards.length}`;
+  progress.style.width = `${((current + 1) / cards.length) * 100}%`;
+}
+
+function flipCard() { cardEl.classList.toggle('is-flipped'); }
+
+function goNext() {
+  if (cards.length === 0) return;
+  current = (current + 1) % cards.length;
+  render();
+}
+
+function goBack() {
+  if (cards.length === 0) return;
+  current = (current - 1 + cards.length) % cards.length;
+  render();
+}
+
+function shuffleCards() {
+  for (let i = cards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cards[i], cards[j]] = [cards[j], cards[i]];
+  }
+  current = 0;
+  render();
+}
+
+function filterGroup(group) {
+  activeGroup = group;
+  if (group === 'all') {
+    cards = [...allCards];
+  } else {
+    cards = allCards.filter(c => c.group === group);
+  }
+  current = 0;
+  render();
+}
+
+// group filter buttons
+document.querySelectorAll('.group-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.group-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filterGroup(btn.dataset.group);
+  });
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goNext();
+  else if (e.key === 'ArrowLeft') goBack();
+  else if (e.key === ' ') { e.preventDefault(); flipCard(); }
+});
+
+render();
+</script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4b19ed17ef0de0d',t:'MTc5MjA5NjYzMg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
